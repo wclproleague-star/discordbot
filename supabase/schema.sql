@@ -15,7 +15,5 @@ create table if not exists match_submissions (
   created_at timestamptz not null default now()
 );
 
--- Bucket de stockage public pour les screenshots (le bot y upload les images).
-insert into storage.buckets (id, name, public)
-values ('match-images', 'match-images', true)
-on conflict (id) do nothing;
+-- Le bucket "match-screenshots" existe déjà dans ce projet Lovable Cloud,
+-- pas besoin de le recréer.

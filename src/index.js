@@ -104,14 +104,14 @@ async function uploadImageToSupabase(attachment, messageId, index) {
   const path = `${messageId}/${index}.${ext}`;
 
   const { error } = await supabase.storage
-    .from('match-screenshots')
+    .from('match-submissions')
     .upload(path, buffer, {
       contentType: attachment.contentType || 'image/png',
       upsert: true,
     });
   if (error) throw error;
 
-  const { data } = supabase.storage.from('match-screenshots').getPublicUrl(path);
+  const { data } = supabase.storage.from('match-submissions').getPublicUrl(path);
   return data.publicUrl;
 }
 

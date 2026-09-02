@@ -69,19 +69,18 @@ client.on('messageCreate', async (message) => {
 
     const [img1, img2] = images;
 
-    const [image1_url, image2_url] = await Promise.all([
-      uploadImageToSupabase(img1, message.id, 1),
-      uploadImageToSupabase(img2, message.id, 2),
-    ]);
-
+    // On transmet directement les liens CDN Discord (pas de re-upload:
+    // la clé anon du bot n'a pas les droits sur le storage). Ces liens
+    // signés expirent après un moment, donc le traitement côté Lovable
+    // doit récupérer/réuploader les images assez vite après réception.
     const { error } = await supabase.from('match_submissions').insert({
       discord_message_id: message.id,
       discord_channel_id: message.channel.id,
       discord_author_id: message.author.id,
       discord_author_name: message.author.username,
       result_text: message.content.trim(),
-      image1_url,
-      image2_url,
+      image1_url: img1.url,
+      image2_url: img2.url,
       status: 'pending',
     });
 
@@ -93,26 +92,5 @@ client.on('messageCreate', async (message) => {
     await message.react('❌').catch(() => {});
   }
 });
-
-async function uploadImageToSupabase(attachment, messageId, index) {
-  const res = await fetch(attachment.url);
-  if (!res.ok) {
-    throw new Error(`Échec du téléchargement de l'image ${attachment.url}`);
-  }
-  const buffer = Buffer.from(await res.arrayBuffer());
-  const ext = attachment.name?.split('.').pop() || 'png';
-  const path = `${messageId}/${index}.${ext}`;
-
-  const { error } = await supabase.storage
-    .from('match-submissions')
-    .upload(path, buffer, {
-      contentType: attachment.contentType || 'image/png',
-      upsert: true,
-    });
-  if (error) throw error;
-
-  const { data } = supabase.storage.from('match-submissions').getPublicUrl(path);
-  return data.publicUrl;
-}
 
 client.login(process.env.DISCORD_BOT_TOKEN);

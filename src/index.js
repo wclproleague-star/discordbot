@@ -1,6 +1,13 @@
 import 'dotenv/config';
+import WebSocket from 'ws';
 import { Client, GatewayIntentBits } from 'discord.js';
 import { createClient } from '@supabase/supabase-js';
+
+// Node 20 n'a pas de WebSocket natif (arrivé en Node 22) ; le SDK Supabase
+// en a besoin pour s'initialiser même si on n'utilise pas Realtime.
+if (!globalThis.WebSocket) {
+  globalThis.WebSocket = WebSocket;
+}
 
 const requiredEnv = [
   'DISCORD_BOT_TOKEN',
@@ -31,7 +38,7 @@ const client = new Client({
   ],
 });
 
-client.once('ready', () => {
+client.once('clientReady', () => {
   console.log(`Connecté en tant que ${client.user.tag}`);
   if (TARGET_CHANNEL_IDS.length) {
     console.log(`Salons surveillés: ${TARGET_CHANNEL_IDS.join(', ')}`);

@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 const requiredEnv = [
   'DISCORD_BOT_TOKEN',
   'SUPABASE_URL',
-  'SUPABASE_SERVICE_ROLE_KEY',
+  'SUPABASE_ANON_KEY',
 ];
 for (const key of requiredEnv) {
   if (!process.env[key]) {
@@ -15,7 +15,7 @@ for (const key of requiredEnv) {
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  process.env.SUPABASE_ANON_KEY,
 );
 
 const TARGET_CHANNEL_IDS = (process.env.DISCORD_CHANNEL_IDS || '')

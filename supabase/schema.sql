@@ -17,3 +17,22 @@ create table if not exists match_submissions (
 
 -- Le bucket "match-screenshots" existe déjà dans ce projet Lovable Cloud,
 -- pas besoin de le recréer.
+
+-- Le bot utilise la clé publique "anon" (pas la service_role, inaccessible
+-- sur Lovable Cloud). On limite donc ses droits au strict nécessaire :
+-- il peut seulement INSÉRER, jamais lire/modifier/supprimer.
+alter table match_submissions enable row level security;
+
+create policy "Bot Discord: insertion seule"
+on match_submissions
+for insert
+to anon
+with check (true);
+
+-- Autorise l'upload (insert) de fichiers dans le bucket match-screenshots
+-- avec la clé anon. Sans ça, le bot ne pourrait pas déposer les images.
+create policy "Bot Discord: upload screenshots"
+on storage.objects
+for insert
+to anon
+with check (bucket_id = 'match-screenshots');
